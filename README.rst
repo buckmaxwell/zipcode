@@ -3,7 +3,7 @@ A simple python package for dealing with zip codes
 
 # Simple package for dealing with zip codes in python.
 
-.. code::python 
+.. code-block::python 
   import zipcode
   
   myzip = zipcode.isequal('44102')
