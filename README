@@ -6,9 +6,9 @@ methods:
  +isequal
 '''
 
-import zipmagic
+import zippy
 
-myzip = zipmagic.isequal('44102')
+myzip = zippy.isequal('44102')
 
 myzip.state     #=> 'OH'
 myzip.city      #=> 'Cleveland'
@@ -18,6 +18,6 @@ myzip.to_dict() #=>  {'zip_type': u'STANDARD', 'city': u'CLEVELAND', 'population
 all keys in the dictionary can be fetched with dot notation.
 '''
 
-zipmagc.islike('00') #=> list of Zip objects that begin with given prefix.
+zippy.islike('00') #=> list of Zip objects that begin with given prefix.
 
 
