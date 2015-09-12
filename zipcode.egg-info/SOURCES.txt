@@ -1,0 +1,8 @@
+README.rst
+setup.cfg
+setup.py
+zipcode.egg-info/PKG-INFO
+zipcode.egg-info/SOURCES.txt
+zipcode.egg-info/dependency_links.txt
+zipcode.egg-info/requires.txt
+zipcode.egg-info/top_level.txt
