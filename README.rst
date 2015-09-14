@@ -13,5 +13,8 @@ Simple package for dealing with zip codes in python.
     >>> #all keys in the dictionary can be fetched with dot notation.
     >>> 
     >>> zipcode.islike('00') #=> list of Zip objects that begin with given prefix.
+    >>> 
+    >>> cbus = (39.98, -82.98)
+    >>> zipcode.isinradius(cbus, 20) #=> list of all zip code objects within 20 miles of 'cbus'
 
 

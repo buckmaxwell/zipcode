@@ -1,0 +1,4 @@
+Version 1.7.0 2015-09-14
+ * added isinradius() for fetching all zip codes within a number of miles
+ * added new dependency -- haversine
+ * added __repr__ support for zip code objects
