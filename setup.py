@@ -8,7 +8,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.3.0',
+    version='1.6.1',
 
     description='A simple python package for dealing with  zip codes in python.',
 
@@ -64,8 +64,9 @@ setup(
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-    package_data={
-        'zipcode': ['zipcode.db'],
-    },
+    #package_data={
+    #    'zipcode': ['zipcode.db'],
+    #},
+    include_package_data=True
 
 )

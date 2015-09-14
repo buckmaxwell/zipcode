@@ -2,11 +2,18 @@ __author__ = 'Max Buck'
 __email__ = 'maxbuckdeveloper@gmail.com'
 __license__ = 'MIT'
 __package__ = 'zipcode'
-__version__ = '1.3.0'
+__version__ = '1.6.1'
 
 
 import sqlite3 as db
-conn = db.connect('zipcode.db')
+import os
+
+db_filename = 'zipcode.db'
+directory = os.path.dirname(os.path.abspath(__file__))
+zipcodedb_location = os.path.join(directory, db_filename)
+conn = db.connect(zipcodedb_location)
+
+
 cur = conn.cursor()
 
 ZIP_CODE = 0
