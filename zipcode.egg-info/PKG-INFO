@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: zipcode
-Version: 1.1.0
+Version: 1.3.0
 Summary: A simple python package for dealing with  zip codes in python.
 Home-page: https://github.com/buckmaxwell/zipcode
 Author: Max Buck
