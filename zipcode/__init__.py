@@ -13,7 +13,7 @@ import math
 _db_filename = 'zipcode.db'
 _directory = os.path.dirname(os.path.abspath(__file__))
 _zipcodedb_location = os.path.join(_directory, _db_filename)
-_conn = db.connect(_zipcodedb_location)
+_conn = db.connect(_zipcodedb_location, check_same_thread=False)
 
 
 _cur = _conn.cursor()
