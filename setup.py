@@ -8,9 +8,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='2.0.0',
+    version='3.0.0',
 
-    description='A simple python package for dealing with  zip codes in python.',
+    description='A simple python package for dealing with  zip codes in python.  Free for non commerial use, for commercial use, you need a license. Check out the README on GitHub for details.',
 
     # The project's main homepage.
     url='https://github.com/buckmaxwell/zipcode',
@@ -49,7 +49,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='zip codes',
+    keywords='zip code zipcode',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

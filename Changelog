@@ -1,3 +1,23 @@
+
+Version 3.0.0 2018-06-17
+ * upgraded database to use data from unitedstateszipcodes.org
+ 	+ this means that to use this package commercially you must purchase a license
+	here -> https://www.unitedstateszipcodes.org/zip-code-database/
+ * removes yaxis and xaxis
+ * removes country
+ * removes tax returns filed
+ * removes wages
+ * changes meaning of location to the previous location text
+ * removes location text
+ * adds area codes
+ * adds acceptable cities
+ * adds county
+ * adds hascity function
+ * adds hasareacode function
+ * add instructions to refresh database intermittently
+ * removes to_dict -> use dict(obj) instead.
+ * changed lon to more standard lng
+
 Version 2.0.0 2015-09-14
  * removed support for certain non useful parameters
  
