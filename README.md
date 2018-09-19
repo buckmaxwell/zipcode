@@ -76,4 +76,4 @@ gunzip zipcode.db.gz
 cp zipcode.db $DB_PATH
 ```
 
-Your all set.  Get to it!
+You're all set.  Get to it!
