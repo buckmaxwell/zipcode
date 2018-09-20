@@ -1,3 +1,8 @@
+Version 4.0.0 2018-09-20
+ * support for using a non-sqlite database
+ * IMPORTATNT. for legal adherence, the zipcodes are no longer packaged with this package
+ and must be downloaded from
+ https://www.unitedstateszipcodes.org/zip-code-database/ via the readme.
 
 Version 3.0.0 2018-06-17
  * upgraded database to use data from unitedstateszipcodes.org

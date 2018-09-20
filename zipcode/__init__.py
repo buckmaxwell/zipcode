@@ -2,96 +2,81 @@ __author__ = 'Max Buck'
 __email__ = 'maxbuckdeveloper@gmail.com'
 __license__ = 'MIT'
 __package__ = 'zipcode'
-__version__ = '3.0.1'
+__version__ = '4.0.0'
 
-
-import sqlite3 as db
-import os
 from haversine import haversine
+from sqlalchemy import (create_engine, Column, Integer, String, Float, Boolean)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 import math
-
-_db_filename = 'zipcode.db'
-_directory = os.path.dirname(os.path.abspath(__file__))
-_zipcodedb_location = os.path.join(_directory, _db_filename)
-_conn = db.connect(_zipcodedb_location, check_same_thread=False)
+import os
 
 
-_cur = _conn.cursor()
+try:
+    conn_str = os.environ['ZIPCODE_CONNECTION_STRING']
+except KeyError:
+    raise Exception('ZIPCODE_CONNECTION_STRING not set, \n'
+            'http://docs.sqlalchemy.org/en/latest/core/engines.html#sqlalchemy.create_engine')
 
-# positions
-_ZIP_CODE = 0 # => "44102"
-_ZIP_CODE_TYPE = 1 # => "STANDARD"
-_CITY= 2 # => "Cleveland"
-_STATE = 3 # => "OH"
-_TIMEZONE = 4 # => "America/New_York"
-_LAT = 5 # => "40.81"
-_LONG = 6 # => "-73.04"
-_SECONDARY_CITIES = 7 # => ""
-_COUNTY = 8 #  => "Cuyahoga County"
-_DECOMMISSIONED = 9 # => False
-_ESTIMATED_POPULATION = 10 # => 31930
-_AREA_CODES = 11 # => "216" or "419,567"
 
-class Zip(object):
-    """The zip code object."""
-    def __init__(self, zip_tuple):
+Base = declarative_base()
+engine = create_engine(conn_str)
+Session = sessionmaker(bind=engine)
 
-        # The 5 digit zipcode TODO: pad front of zips with 0s
-        self.zip = zip_tuple[_ZIP_CODE]
+class Zip(Base):
+    __tablename__ = 'zipcodes'
+    
+    zipcode = Column(String, primary_key=True)
+    zipcode_type = Column(String)
+    city = Column(String)
+    state = Column(String)
+    timezone = Column(String)
+    lat = Column(Float)
+    lng = Column(Float)
+    _secondary_cities = Column(String)
+    county = Column(String)
+    decommissioned = Column(Boolean)
+    estimated_population = Column(Integer)
+    _area_codes = Column(String) 
 
-        # The type of zipcode accoroding to USPS: UNIQUE, PO BOX, STANDARD
-        self.zip_type = zip_tuple[_ZIP_CODE_TYPE]
+    @property
+    def location(self):
+        "{}, {}".format(self.city, self.state)
 
-        # primary city associated w zip
-        self.city = zip_tuple[_CITY]
+    @property
+    def secondary_cities(self):
+        return self._secondary_cities.split(", ")
 
-        self.state = zip_tuple[_STATE]
+    @secondary_cities.setter
+    def secondary_cities(self, value):
+        self._secondary_cities = value
 
-        # America/New_York -> possible future support for other tz
-        # formats => https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        self.timezone = zip_tuple[_TIMEZONE]
+    @property
+    def area_codes(self):
+        return self._area_codes.split(", ")
 
-        # The lat/lng associated with the zipcode according to the
-        # National Weather Service.  This can be empty when there is no
-        # NWS Data"
-        self.lat = zip_tuple[_LAT]
-        self.lng = zip_tuple[_LONG]
-
-        # The city with its state or territory => 'Cleveland, OH' or 'Anasco, PR'"""
-        self.location = "{}, {}".format(zip_tuple[_CITY], zip_tuple[_STATE])
-
-        # a list of non-primary cities that are also acceptable
-        self.secondary_cities = zip_tuple[_SECONDARY_CITIES].split(", ")
-
-        self.county = zip_tuple[_COUNTY]
-
-        # A boolean value that reveals if a zipcode is still in use
-        self.decommissioned = zip_tuple[_DECOMMISSIONED]
-
-        # Estimated population
-        self.population = zip_tuple[_ESTIMATED_POPULATION]
-
-        # Area codes
-        self.area_codes = zip_tuple[_AREA_CODES].split(",")
+    @area_codes.setter
+    def area_codes(self, value):
+        self._area_codes = value
 
     def __repr__(self):
-        return '<Zip: {zip}>'.format(zip=self.zip)
+        return '<ZipCode {}>'.format(self.zipcode)
 
-        def __iter__(self):
-            """Implements dict()"""
-            yield ('zip', self.zip)
-            yield ('zip_type', self.zip_type)
-            yield ('city', self.city)
-            yield ('state',self.state)
-            yield ('timezone', self.timezone)
-            yield ('lat', self.lat)
-            yield ('lng', self.lng)
-            yield ('county', self.county)
-            yield ('location', self.location)
-            yield ('decommissioned', self.decommissioned)
-            yield ('population', self.population)
-            yield ('area_codes', self.area_codes)
-            yield ('secondary_cities', self.secondary_cities)
+    def __iter__(self):
+        """Implements dict()"""
+        yield ('zip', self.zip)
+        yield ('zip_type', self.zip_type)
+        yield ('city', self.city)
+        yield ('state',self.state)
+        yield ('timezone', self.timezone)
+        yield ('lat', self.lat)
+        yield ('lng', self.lng)
+        yield ('county', self.county)
+        yield ('location', self.location)
+        yield ('decommissioned', self.decommissioned)
+        yield ('population', self.population)
+        yield ('area_codes', self.area_codes)
+        yield ('secondary_cities', self.secondary_cities)
 
 
 def _make_zip_list(list_of_zip_tuples):
@@ -100,7 +85,6 @@ def _make_zip_list(list_of_zip_tuples):
         z = Zip(zip_tuple)
         zip_list.append(z)
     return zip_list
-
 
 def _validate(zipcode):
     if not isinstance(zipcode, str):

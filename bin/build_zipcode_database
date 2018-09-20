@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import csv
+import os
+from zipcode import Session, Zip, Base, engine
+
+try:
+    zips_csv = os.environ['ZIPS_CSV']
+except KeyError:
+    raise Exception('ZIPS_CSV must be set to the full path of the csv'
+            'downloaded from https://www.unitedstateszipcodes.org/zip-code-database/')
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
+    with open(zips_csv) as f:
+        session = Session()
+        reader = csv.reader(f)
+        """zip,type,decommissioned,primary_city,acceptable_cities,
+        unacceptable_cities,state,county,timezone,area_codes,
+        world_region,country,latitude,longitude,
+        irs_estimated_population_2015"""
+        for row in reader:
+            if row[0] == 'zip':
+                continue # header row
+            print(row)
+            zc = Zip(
+                    zipcode=row[0],
+                    zipcode_type=row[1],
+                    city=row[3],
+                    state=row[6],
+                    timezone=row[8],
+                    lat=float(row[12]),
+                    lng=float(row[13]),
+                    secondary_cities=row[4],
+                    county=row[7],
+                    decommissioned=bool(row[2]),
+                    estimated_population=int(row[14]),
+                    area_codes=row[0]
+                )
+            session.add(zc)
+    session.commit()
+    session.close()
