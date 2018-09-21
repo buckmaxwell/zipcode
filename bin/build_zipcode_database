@@ -4,6 +4,9 @@
 import csv
 import os
 from zipcode import Session, Zip, Base, engine
+print('dog')
+Base.metadata.create_all(engine)
+print('dog done!')
 
 try:
     zips_csv = os.environ['ZIPS_CSV']
@@ -12,7 +15,6 @@ except KeyError:
             'downloaded from https://www.unitedstateszipcodes.org/zip-code-database/')
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
     with open(zips_csv) as f:
         session = Session()
         reader = csv.reader(f)
@@ -20,7 +22,7 @@ if __name__ == '__main__':
         unacceptable_cities,state,county,timezone,area_codes,
         world_region,country,latitude,longitude,
         irs_estimated_population_2015"""
-        for row in reader:
+        for i,row in enumerate(reader):
             if row[0] == 'zip':
                 continue # header row
             print(row)
@@ -34,10 +36,15 @@ if __name__ == '__main__':
                     lng=float(row[13]),
                     secondary_cities=row[4],
                     county=row[7],
-                    decommissioned=bool(row[2]),
+                    decommissioned=bool(int(row[2])),
                     estimated_population=int(row[14]),
-                    area_codes=row[0]
+                    area_codes=row[9]
                 )
             session.add(zc)
-    session.commit()
+            try: 
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print('error. session was rolled back')
+                raise e
     session.close()

@@ -41,11 +41,15 @@ class Zip(Base):
 
     @property
     def location(self):
-        "{}, {}".format(self.city, self.state)
+        return "{}, {}".format(self.city, self.state)
 
     @property
     def secondary_cities(self):
-        return self._secondary_cities.split(", ")
+        result = self._secondary_cities.replace(', ', ',').split(",")
+        if len(result) == 1 and result[0]=='':
+            return []
+        else:
+            return result
 
     @secondary_cities.setter
     def secondary_cities(self, value):
@@ -53,19 +57,23 @@ class Zip(Base):
 
     @property
     def area_codes(self):
-        return self._area_codes.split(", ")
+        result =  self._area_codes.replace(', ',',').split(",")
+        if len(result) == 1 and result[0]=='':
+            return []
+        else:
+            return result
 
     @area_codes.setter
     def area_codes(self, value):
         self._area_codes = value
 
     def __repr__(self):
-        return '<ZipCode {}>'.format(self.zipcode)
+        return '<Zip {}>'.format(self.zipcode)
 
     def __iter__(self):
         """Implements dict()"""
-        yield ('zip', self.zip)
-        yield ('zip_type', self.zip_type)
+        yield ('zipcode', self.zipcode)
+        yield ('zipcode_type', self.zipcode_type)
         yield ('city', self.city)
         yield ('state',self.state)
         yield ('timezone', self.timezone)
@@ -74,17 +82,11 @@ class Zip(Base):
         yield ('county', self.county)
         yield ('location', self.location)
         yield ('decommissioned', self.decommissioned)
-        yield ('population', self.population)
+        yield ('population', self.estimated_population)
         yield ('area_codes', self.area_codes)
         yield ('secondary_cities', self.secondary_cities)
 
 
-def _make_zip_list(list_of_zip_tuples):
-    zip_list = list()
-    for zip_tuple in list_of_zip_tuples:
-        z = Zip(zip_tuple)
-        zip_list.append(z)
-    return zip_list
 
 def _validate(zipcode):
     if not isinstance(zipcode, str):
@@ -101,33 +103,53 @@ def _validate(zipcode):
 def islike(zipcode):
     """Takes a partial zip code and returns a list of zipcode objects with matching prefixes."""
     _validate(zipcode)
-    _cur.execute('SELECT * FROM ZIPS WHERE ZIP_CODE LIKE ?', ['{zipcode}%'.format(zipcode=str(zipcode))])
-    return _make_zip_list(_cur.fetchall())
+    session = Session()
+    zips = session.query(Zip).filter(Zip.zipcode.like("%{}%".format(str(zipcode)))).all()
+    session.close()
+    return zips 
 
 def isequal(zipcode):
     """Takes a zipcode and returns the matching zipcode object.  If it does not exist, None is returned"""
     _validate(zipcode)
-    _cur.execute('SELECT * FROM ZIPS WHERE ZIP_CODE == ?', [str(zipcode)])
-    row = _cur.fetchone()
-    if row:
-        return Zip(row)
+    session = Session()
+    result = session.query(Zip).filter(Zip.zipcode == str(zipcode)).one()
+    session.close()
+    if result:
+        return result 
     else:
         return None
 
 def hasareacode(areacode):
     areacode = str(areacode)
-    _cur.execute('SELECT * FROM ZIPS WHERE AREA_CODES LIKE ?', ['%{}%'.format(areacode)])
-    return _make_zip_list(_cur.fetchall())
+    session = Session()
+    zips = session.query(Zip).filter(Zip._area_codes.like("%{}%".format(str(areacode)))).all()
+    session.close()
+    return zips
 
 def hascounty(county):
-    _cur.execute('SELECT * FROM ZIPS WHERE COUNTY LIKE ?', ['%{}%'.format(areacode)])
-    return _make_zip_list(_cur.fetchall())
+    session = Session()
+    zips = session.query(Zip).filter(Zip.county.like("%{}%".format(str(county)))).all()
+    session.close()
+    return zips 
 
-def hascity(city, state=""):
+def hascity(city, state="", include_secondary=True):
     """Given a city name and 2 letter state code, return associated zip codes"""
-    _cur.execute('SELECT * FROM ZIPS WHERE CITY LIKE ? AND STATE LIKE ?',
-            ['%{}%'.format(city), '%{}%'.format(state)])
-    return _make_zip_list(_cur.fetchall())
+    session = Session()
+    if include_secondary:
+        zips = session.query(Zip)\
+            .filter( (Zip.city.like("%{}%".format(str(city)))) |
+                    (Zip._secondary_cities.like("%{}%".format(str(city))))
+                   )\
+            .filter(Zip.state.like("%{}%".format(str(state))))\
+            .all()
+    else:
+        zips = session.query(Zip)\
+            .filter( Zip.city.like("%{}%".format(str(city))))\
+            .filter(Zip.state.like("%{}%".format(str(state))))\
+            .all()
+
+    session.close()
+    return zips 
 
 def isinradius(point, distance):
     """Takes a tuple of (lat, lng) where lng and lat are floats, and a distance in miles. Returns a list of zipcodes near the point."""
@@ -154,14 +176,18 @@ def isinradius(point, distance):
     if lngmin > lngmax:
         lngmin, lngmax = lngmax, lngmin
 
-    stmt = ('SELECT * FROM ZIPS WHERE LONG > {lngmin} AND LONG < {lngmax}\
-     AND LAT > {latmin} AND LAT < {latmax}')
-    _cur.execute(stmt.format(lngmin=lngmin, lngmax=lngmax, latmin=latmin, latmax=latmax))
-    results = _cur.fetchall()
+    session = Session()
+    zips = session.query(Zip)\
+        .filter(Zip.lng > lngmin)\
+        .filter(Zip.lng < lngmax)\
+        .filter(Zip.lat > latmin)\
+        .filter(Zip.lat < latmax)\
+        .all()
+    session.close()
 
-    for row in results:
-        if haversine(point, (row[_LAT], row[_LONG])) <= distance:
-            zips_in_radius.append(Zip(row))
+    for z in zips:
+        if haversine(point, (z.lat, z.lng)) <= distance:
+            zips_in_radius.append(z)
     return zips_in_radius
 
 

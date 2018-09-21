@@ -12,7 +12,8 @@ use, you must download it from them though as I am not allowed to distribute it.
 
 1. go to https://www.unitedstateszipcodes.org/zip-code-database/
 2. download the CSV file, pick free or a commercial version if you need to use
-   it commercially.
+   it commercially. If you need to buy the commercial one, do so, but download
+   the free one as that is the one supported by this package.
 3. move the downloaded file to a good location and set appropriate environment
    variables.
 ```bash
@@ -27,7 +28,7 @@ source ~/.bash_profile
  - after you decide which database to use, *find your connection string*
    [here](http://docs.sqlalchemy.org/en/latest/core/engines.html#sqlalchemy.create_engine).
 ```bash
-# set connection string, we use sqlite as an example
+# set connection string, we use sqlite as an example (but use postgres in production!)
 echo 'ZIPCODE_CONNECTION_STRING=sqlite:///zipcode.db' >> ~/.bash_profile
 source ~/.bash_profile
 ```
@@ -36,6 +37,7 @@ source ~/.bash_profile
 pip install zipcode
 ```
 6. populate the database
+  - this might take a while ~10min for postgres. be patient, it'll be fast once loaded
 ```bash
 build_zipcode_database
 ```
@@ -43,17 +45,17 @@ Good to go. The next section shows you how to use the package.
 
 ## Getting started
 
-
 ```py
 import zipcode
 
 myzip = zipcode.isequal('44102')
 myzip.state     #=> 'OH'
 myzip.city      #=> 'Cleveland'
+myzip.location #=> 'Cleveland, OH'
 
-dict(myzip) #=> {'zip_type': u'STANDARD', 'city': u'Cleveland', 'decommissioned': 0, 'zip': u'44102', 'state': u'OH', 'secondary_cities': [u''], 'location': 'Cleveland, OH', 'area_codes': [u'216'], 'lat': 41.48, 'timezone': u'America/New_York', 'lng': -81.74, 'population': 31930} 
+# all keys in the dictionary can also be fetched with dot notation.
+dict(myzip) #=> {'zipcode': '44102', 'zipcode_type': 'STANDARD', 'city': 'Cleveland', 'state': 'OH', 'timezone': 'America/New_York', 'lat': 41.48, 'lng': -81.74, 'county': 'Cuyahoga County', 'location': 'Cleveland, OH', 'decommissioned': True, 'population': 31930, 'area_codes': ['216'], 'secondary_cities': []} 
 
-#all keys in the dictionary can be fetched with dot notation.
 
 zipcode.islike('00') #=> list of Zip objects that begin with given prefix.
 
@@ -61,7 +63,8 @@ cbus = (39.98, -82.98)
 zipcode.isinradius(cbus, 20) #=> list of all zip code objects within 20 miles of 'cbus'
 
 zipcode.hascity('Cleveland', 'OH') #=> list of zip codes in Cleveland, OH
-zipcode.hascity('', 'OH') #=> list of zip codes in OH
+zipcode.hascity('', 'OH') #=> list of zip codes in state of OH
+zipcode.hascity('Flushing', 'NY', include_secondary=False) #=> don't include zips where flushing is a secondary city
 
 zipcode.hasareacode(216) #=> list of zip codes associated with 216 
 ```
