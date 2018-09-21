@@ -8,7 +8,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='3.0.1',
+    version='4.0.0',
 
     description='A simple python package for dealing with  zip codes in python.  Free for non commerial use, for commercial use, you need a license. Check out the README on GitHub for details.',
 
@@ -54,19 +54,13 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    scripts=['bin/build_zipcode_database',
+    ],
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['haversine'],
-
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.  If using Python 2.6 or less, then these
-    # have to be included in MANIFEST.in as well.
-    #package_data={
-    #    'zipcode': ['zipcode.db'],
-    #},
-    include_package_data=True
+    install_requires=['haversine', 'SQLAlchemy'],
 
 )

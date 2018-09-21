@@ -2,4 +2,5 @@ dist
 build
 *.pyc
 *.egg-info
+venv
 .DS_Store
